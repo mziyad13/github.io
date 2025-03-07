@@ -1,0 +1,641 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Devine le Brawler</title>
+  <link rel="icon" href="bstar.webp" type="image/webp">
+  <link rel="shortcut icon" href="bstar.webp" type="image/webp">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      text-align: center;
+      overflow-y: auto;
+      position: relative;
+      scroll-behavior: smooth;
+    }
+    .bg {
+      position: absolute; 
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('aaa.jpg') no-repeat center center fixed;
+      background-size: cover;
+      animation: backgroundAnimation 30s infinite alternate;
+      z-index: -1;
+    }
+    @keyframes backgroundAnimation {
+      0% { filter: brightness(0.8); }
+      50% { filter: brightness(1); }
+      100% { filter: brightness(0.8); }
+    }
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+      transition: transform 0.3s;
+      margin-top: 50px;
+    }
+    .container:hover {
+      transform: scale(1.02);
+    }
+    .title {
+      font-family: 'Roboto', sans-serif;
+      font-size: 42px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      margin-bottom: 20px;
+      animation: fade-in 1s ease, move 2s ease-in-out infinite alternate;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes move {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0); }
+    }
+    .input-container {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .input-container input {
+      width: 60%;
+      max-width: 400px;
+      padding: 12px;
+      font-size: 18px;
+      border: 2px solid #fff;
+      border-radius: 5px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .input-container input:focus {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.02);
+    }
+    .input-container button {
+      margin-left: 10px;
+      padding: 12px 25px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      background-color: #ff3e3e;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .input-container button:hover {
+      background-color: #ff5e5e;
+      transform: scale(1.05);
+    }
+    .suggestions {
+      margin-top: 10px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      max-width: 400px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid #fff;
+      border-radius: 5px;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+    .suggestions div {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      cursor: pointer;
+      color: #fff;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .suggestions div img {
+      width: 30px;
+      height: 30px;
+      margin-right: 10px;
+      border-radius: 50%;
+    }
+    .suggestions div:hover {
+      background-color: #444;
+      transform: scale(1.02);
+    }
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .category {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      position: relative;
+      transition: transform 0.3s;
+    }
+    .category:hover {
+      transform: scale(1.05);
+    }
+    .indicator-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .indicator {
+      margin-top: 5px;
+      width: 100%;
+      height: 60px;
+      border-radius: 5px;
+      font-size: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-weight: bold;
+      animation: fade-in 0.5s ease forwards;
+      opacity: 0;
+    }
+    .indicator img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      border-radius: 5px;
+    }
+    .correct {
+      background-color: #4caf50;
+      border: 2px solid #3e8e41;
+    }
+    .incorrect {
+      background-color: #f44336;
+      border: 2px solid #d32f2f;
+    }
+    .victory-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.9);
+      color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 24px;
+      animation: victory-animation 1s ease-out forwards;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .victory-container.show {
+      opacity: 1;
+      animation: pop-up 0.5s ease forwards;
+    }
+    @keyframes pop-up {
+      from {
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+      to {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+    .victory-container h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #4caf50;
+      animation: fade-in 0.5s;
+    }
+    .victory-container p {
+      margin: 10px 0;
+      animation: fade-in 0.7s;
+    }
+    @keyframes victory-animation {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+    @keyframes fade-in {
+      to {
+        opacity: 1;
+      }
+    }
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 999;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #ff0;
+      opacity: 0.8;
+      animation: fall 3s linear infinite;
+    }
+    @keyframes fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+      }
+    }
+    /* Styles pour l'indice */
+    .hint {
+      display: none;
+      margin-top: 20px;
+      font-size: 18px;
+      color: #ffcc00; /* Couleur de l'indice */
+      cursor: pointer; /* Changer le curseur pour indiquer cliquable */
+    }
+    .hint img {
+      max-width: 100px;
+      filter: blur(15px); /* Image floue accrue */
+    }
+    /* Container d'indice avec croix */
+    .hint-container {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      animation: hint-animation 0.5s ease forwards;
+      z-index: 1000;
+    }
+    .hint-container .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      color: #ffcc00;
+      font-size: 24px;
+    }
+
+    .hint-message {
+  display: block; /* Affiche le rectangle */
+  margin-top: 20px; /* Espace au-dessus */
+  padding: 15px; /* Espace à l'intérieur */
+  background-color: rgba(255, 255, 0, 0.2); /* Couleur de fond jaune clair */
+  border: 2px solid #ffcc00; /* Bordure dorée */
+  border-radius: 10px; /* Coins arrondis */
+  font-size: 18px; /* Taille de la police */
+  color: #ffcc00; /* Couleur du texte (jaune) */
+  cursor: pointer; /* Changer le curseur pour indiquer cliquable */
+  transition: background-color 0.3s, transform 0.3s; /* Effets de transition */
+}
+
+.hint-message:hover {
+  background-color: rgba(255, 255, 0, 0.4); /* Couleur de fond au survol */
+  transform: scale(1.05); /* Légère animation de zoom au survol */
+}
+
+    @keyframes hint-animation {
+      from {
+        transform: translate(-50%, -40%) scale(0.5);
+      }
+      to {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="container">
+    <div class="title">DEVINE LE BRAWLER DU JOUR !</div>
+    <div id="hint-message">Indice dans 7 essais</div>
+    <div class="input-container">
+      <input type="text" placeholder="Nom du Brawler" id="brawler-input" oninput="showSuggestions()" onkeydown="checkEnter(event)">
+      <button onclick="submitGuess()">Deviner</button>
+    </div>
+    <div id="suggestions" class="suggestions"></div>
+    <div class="categories">
+      <div class="category">
+        <div>Personnage</div>
+        <div id="personnage" class="indicator-container"></div>
+      </div>
+      <div class="category">
+        <div>Rareté</div>
+        <div id="rarete" class="indicator-container"></div>
+      </div>
+      <div class="category">
+        <div>PV</div>
+        <div id="pv" class="indicator-container"></div>
+      </div>
+      <div class="category">
+        <div>Vitesse</div>
+        <div id="vitesse" class="indicator-container"></div>
+      </div>
+      <div class="category">
+        <div>Portée</div>
+        <div id="portee" class="indicator-container"></div>
+      </div>
+      <div class="category">
+        <div>Année d'arrivée</div>
+        <div id="annee" class="indicator-container"></div>
+      </div>
+    </div>
+    <div id="attempts" style="margin-top: 20px;"></div>
+    <div class="hint" id="hint">
+      <p>Indice :</p>
+      <img src="" alt="Indice" id="hint-image"> <!-- Image floue -->
+    </div>
+  </div>
+
+  <div class="hint-container" id="hint-container">
+    <span class="close" onclick="closeHint()">✖</span>
+    <img src="" alt="Brawler Hint" id="hint-brawler-image" style="filter: blur(15px);">
+    <p>Quel Brawler ?</p>
+  </div>
+
+  <script>
+    const brawlersData = {
+      "Shelly": { "personnage": "Shelly", "rarete": "Commune", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2017", "image": "shelly.webp" },
+      "Nita": { "personnage": "Nita", "rarete": "Rare", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2017", "image": "nita.png" },
+"Colt": { "personnage": "Colt", "rarete": "Rare", "pv": "Faibles", "vitesse": "Moyenne", "portee": "Longue", "annee": "2017", "image": "colt.png" },
+      "Bull": { "personnage": "Bull", "rarete": "Rare", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Courte", "annee": "2017", "image": "bull.png" },
+      "Brock": { "personnage": "Brock", "rarete": "Rare", "pv": "Faibles", "vitesse": "Moyenne", "portee": "Longue", "annee": "2017", "image": "brock.png" },
+      "El Primo": { "personnage": "El Primo", "rarete": "Rare", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Courte", "annee": "2017", "image": "el_primo.png" },
+      "Barley": { "personnage": "Barley", "rarete": "Rare", "pv": "Faibles", "vitesse": "Moyenne", "portee": "Longue", "annee": "2017", "image": "barley.png" },
+      "Poco": { "personnage": "Poco", "rarete": "Rare", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2017", "image": "poco.png" },
+      "Rosa": { "personnage": "Rosa", "rarete": "Rare", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Courte", "annee": "2019", "image": "rosa.png" },
+      "Jessie": { "personnage": "Jessie", "rarete": "Super Rare", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2017", "image": "jessie.png" },
+      "Dynamike": { "personnage": "Dynamike", "rarete": "Super Rare", "pv": "Faibles", "vitesse": "Moyenne", "portee": "Longue", "annee": "2017", "image": "dynamique.png" },
+      "Tick": { "personnage": "Tick", "rarete": "Super Rare", "pv": "Faibles", "vitesse": "Moyenne", "portee": "Longue", "annee": "2019", "image": "tick.png" },
+      "8-Bit": { "personnage": "8-Bit", "rarete": "Super Rare", "pv": "Élevés", "vitesse": "Lente", "portee": "Longue", "annee": "2019", "image": "8bit.png" },
+      "Rico": { "personnage": "Rico", "rarete": "Super Rare", "pv": "Faibles", "vitesse": "Moyenne", "portee": "Longue", "annee": "2017", "image": "rico.png" },
+      "Carl": { "personnage": "Carl", "rarete": "Super Rare", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2019", "image": "carl.png" },
+      "Penny": { "personnage": "Penny", "rarete": "Super Rare", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2018", "image": "penny.png" },
+      "Darryl": { "personnage": "Darryl", "rarete": "Super Rare", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Courte", "annee": "2018", "image": "darryl.png" },
+      "Jacky": { "personnage": "Jacky", "rarete": "Super Rare", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Courte", "annee": "2020", "image": "jacky.png" },
+      "Gus": { "personnage": "Gus", "rarete": "Super Rare", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2022", "image": "gus.png" },
+      "Bo": { "personnage": "Bo", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2017", "image": "bo.png" },
+      "Piper": { "personnage": "Piper", "rarete": "Épique", "pv": "Faibles", "vitesse": "Moyenne", "portee": "Très Longue", "annee": "2017", "image": "piper.png" },
+      "Pam": { "personnage": "Pam", "rarete": "Épique", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2017", "image": "pam.png" },
+      "Frank": { "personnage": "Frank", "rarete": "Épique", "pv": "Très Élevés", "vitesse": "Lente", "portee": "Courte", "annee": "2018", "image": "frank.png" },
+      "Bibi": { "personnage": "Bibi", "rarete": "Épique", "pv": "Élevés", "vitesse": "Rapide", "portee": "Courte", "annee": "2019", "image": "bibi.png" },
+      "Bea": { "personnage": "Bea", "rarete": "Épique", "pv": "Faibles", "vitesse": "Moyenne", "portee": "Longue", "annee": "2019", "image": "bea.png" },
+      "Nani": { "personnage": "Nani", "rarete": "Épique", "pv": "Faibles", "vitesse": "Moyenne", "portee": "Longue", "annee": "2020", "image": "nani.png" },
+      "Edgar": { "personnage": "Edgar", "rarete": "Épique", "pv": "Moyens", "vitesse": "Rapide", "portee": "Courte", "annee": "2020", "image": "edgar.png" },
+      "Stu": { "personnage": "Stu", "rarete": "Épique", "pv": "Moyens", "vitesse": "Rapide", "portee": "Moyenne", "annee": "2021", "image": "stu.png" },
+      "Grom": { "personnage": "Grom", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2021", "image": "grom.png" },
+      "Ash": { "personnage": "Ash", "rarete": "Épique", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Courte", "annee": "2021", "image": "ash.png" },
+      "Griff": { "personnage": "Griff", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2021", "image": "griff.png" },
+      "Lola": { "personnage": "Lola", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2021", "image": "lola.png" },
+      "Angelo": { "personnage": "Angelo", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "angelo.png" },
+      "Belle": { "personnage": "Belle", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2021", "image": "belle.png" },
+      "Buzz": { "personnage": "Buzz", "rarete": "Mythique", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Courte", "annee": "2021", "image": "buzz.png" },
+      "Byron": { "personnage": "Byron", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2020", "image": "byron.png" },
+      "Charlie": { "personnage": "Charlie", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2023", "image": "charlie.webp" },
+      "Chuck": { "personnage": "Chuck", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2023", "image": "chuck.png" },
+      "Clancy": { "personnage": "Clancy", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "clancy.webp" },
+      "Kenji": { "personnage": "Kenji", "rarete": "Légendaire", "pv": "Moyens", "vitesse": "Rapide", "portee": "Courte", "annee": "2024", "image": "kenji.png" },
+      "Draco": { "personnage": "Draco", "rarete": "Légendaire", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Longue", "annee": "2024", "image": "draco.png" },
+      "Mico": { "personnage": "Mico", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "mico.png" },
+      "Berry": { "personnage": "Berry", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "berry.png" },
+      "Lily": { "personnage": "Lily", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "lily.png" },
+      "Willow": { "personnage": "Willow", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2023", "image": "willow.png" },
+      "Maisy": { "personnage": "Maisy", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2023", "image": "maisie.png" },
+      "Gray": { "personnage": "Gray", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2022", "image": "gray.png" },
+      "Hank": { "personnage": "Hank", "rarete": "Mythique", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Courte", "annee": "2023", "image": "hank.png" },
+      "Cordelius": { "personnage": "Cordelius", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2023", "image": "cordelius.png" },
+      "Doug": { "personnage": "Doug", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2023", "image": "doug.png" },
+      "Pearl": { "personnage": "Pearl", "rarete": "Épique", "pv": "Élevés", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2023", "image": "pearl.webp" },
+      "Finx": { "personnage": "Finx", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "finx.png" },
+      "Lumi": { "personnage": "Lumi", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "lumi.webp" },
+      "Ollie": { "personnage": "Ollie", "rarete": "Épique", "pv": "Moyens", "vitesse": "Rapide", "portee": "Moyenne", "annee": "2024", "image": "ollie.png" },
+      "Meeple": { "personnage": "Meeple", "rarete": "Mythique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "meeple.png" },
+      "Juju": { "personnage": "Juju", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "juju.png" },
+      "Shade": { "personnage": "Shade", "rarete": "Légendaire", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2024", "image": "shade.png" },
+      "Moe": { "personnage": "Moe", "rarete": "Super Rare", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "moe.png" },
+      "R-T": { "personnage": "R-T", "rarete": "Légendaire", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2024", "image": "r-t.png" },
+      "Buster": { "personnage": "Buster", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "buster.png" },
+      "Sam": { "personnage": "Sam", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Courte", "annee": "2024", "image": "sam.png" },
+      "Otis": { "personnage": "Otis", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "otis.png" },
+      "Bonnie": { "personnage": "Bonnie", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "bonnie.png" },
+      "Janet": { "personnage": "Janet", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2024", "image": "janet.png" },
+      "Eve": { "personnage": "Eve", "rarete": "Légendaire", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2024", "image": "eve.png" },
+      "Fang": { "personnage": "Fang", "rarete": "Épique", "pv": "Moyens", "vitesse": "Rapide", "portee": "Courte", "annee": "2024", "image": "fang.png" },
+      "Meg": { "personnage": "Meg", "rarete": "Épique", "pv": "Moyens", "vitesse": "Rapide", "portee": "Moyenne", "annee": "2024", "image": "meg.png" },
+      "Amber": { "personnage": "Amber", "rarete": "Légendaire", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2024", "image": "amber.png" },
+      "Colette": { "personnage": "Colette", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2024", "image": "colette.png" },
+      "Surge": { "personnage": "Surge", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2024", "image": "surge.png" },
+      "Sprout": { "personnage": "Sprout", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2020", "image": "sprout.png" },
+      "Max": { "personnage": "Max", "rarete": "Épique", "pv": "Moyens", "vitesse": "Rapide", "portee": "Moyenne", "annee": "2019", "image": "max.png" },
+      "Mr. P": { "personnage": "Mr. P", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2018", "image": "mr_p.png" },
+      "Emz": { "personnage": "Emz", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2018", "image": "emz.png" },
+      "Sandy": { "personnage": "Sandy", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2019", "image": "sandy.png" },
+      "Gene": { "personnage": "Gene", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2018", "image": "gene.png" },
+      "Frank": { "personnage": "Frank", "rarete": "Épique", "pv": "Très Élevés", "vitesse": "Moyenne", "portee": "Courte", "annee": "2018", "image": "frank.png" },
+      "Tara": { "personnage": "Tara", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Moyenne", "annee": "2018", "image": "tara.png" },
+      "Penny": { "personnage": "Penny", "rarete": "Épique", "pv": "Moyens", "vitesse": "Moyenne", "portee": "Longue", "annee": "2018", "image": "penny.png" },
+      "Mortis": { "personnage": "Mortis", "rarete": "Épique", "pv": "Moyens", "vitesse": "Rapide", "portee": "Courte", "annee": "2018", "image": "mortis.png" }
+      };
+
+    const brawlersList = Object.keys(brawlersData);
+
+    function getBrawlerOfTheDay() {
+      const now = new Date();
+      const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+      return brawlersList[dayOfYear % brawlersList.length];
+    }
+
+    const personnageMystere = getBrawlerOfTheDay();
+    const alreadyGuessed = new Set();
+    let attemptsCount = 0;
+
+    function verifierCorrespondance(choix) {
+      const mystere = brawlersData[personnageMystere];
+      const choisi = brawlersData[choix];
+      if (!choisi) return;
+
+      document.getElementById("suggestions").style.display = "none";
+
+      const personnageContainer = document.getElementById("personnage");
+      const imageIndicator = document.createElement("div");
+      imageIndicator.className = `indicator ${mystere.personnage === choisi.personnage ? "correct" : "incorrect"}`;
+      imageIndicator.innerHTML = `<img src="${choisi.image}" alt="${choisi.personnage}">`;
+      personnageContainer.prepend(imageIndicator);
+
+      const categories = ["rarete", "pv", "vitesse", "portee", "annee"];
+      let delay = 0;
+
+      setTimeout(() => {
+        const indicatorContainer = document.getElementById("rarete");
+        const indicator = document.createElement("div");
+        indicator.className = `indicator ${mystere.rarete === choisi.rarete ? "correct" : "incorrect"}`;
+        indicator.textContent = choisi.rarete;
+        indicatorContainer.prepend(indicator);
+      }, delay += 500);
+
+      categories.slice(1).forEach(categorie => {
+        setTimeout(() => {
+          const indicatorContainer = document.getElementById(categorie);
+          const indicator = document.createElement("div");
+          indicator.className = `indicator ${mystere[categorie] === choisi[categorie] ? "correct" : "incorrect"}`;
+          indicator.textContent = choisi[categorie];
+          indicatorContainer.prepend(indicator);
+        }, delay += 500);
+      });
+
+      if (choix === personnageMystere) {
+        showVictoryScreen();
+      }
+    }
+
+    function addAttempt(choix) {
+      alreadyGuessed.add(choix);
+      attemptsCount++;
+      const attemptsDiv = document.getElementById("attempts");
+      const attemptDiv = document.createElement("div");
+      attemptDiv.textContent = choix;
+      attemptsDiv.prepend(attemptDiv);
+
+      // Met à jour le message d'indice
+      const hintMessage = document.getElementById("hint-message");
+      if (attemptsCount < 7) {
+        hintMessage.textContent = `Indice dans ${7 - attemptsCount} essais`;
+      } else {
+        hintMessage.textContent = "Indice disponible ! Cliquez ici pour le voir.";
+        hintMessage.onclick = showHint; // Rendre cliquable
+        hintMessage.style.cursor = "pointer"; // Changer le curseur
+      }
+    }
+
+    function showHint() {
+      const hintImage = document.getElementById("hint-image");
+      hintImage.src = brawlersData[personnageMystere].image; // Met à jour l'image de l'indice
+      document.getElementById("hint").style.display = "block"; // Affiche l'indice
+
+      // Affiche l'animation avec le texte
+      const hintContainer = document.getElementById("hint-container");
+      const hintBrawlerImage = document.getElementById("hint-brawler-image");
+      hintBrawlerImage.src = brawlersData[personnageMystere].image;
+      hintContainer.style.display = "block"; // Affiche le conteneur d'indice
+    }
+
+    function closeHint() {
+      document.getElementById("hint-container").style.display = "none"; // Ferme le conteneur d'indice
+    }
+
+    function submitGuess() {
+      const choix = document.getElementById("brawler-input").value.trim();
+      if (choix in brawlersData && !alreadyGuessed.has(choix)) {
+        addAttempt(choix);
+        verifierCorrespondance(choix);
+        document.getElementById("brawler-input").value = ""; // Réinitialiser le champ de recherche
+      } else if (alreadyGuessed.has(choix)) {
+        alert("Ce Brawler a déjà été deviné !");
+      } else {
+        alert("Ce Brawler n'existe pas !");
+      }
+    }
+
+    function checkEnter(event) {
+      if (event.key === 'Enter') {
+        const suggestionsDiv = document.getElementById("suggestions");
+        const firstSuggestion = suggestionsDiv.firstChild;
+        if (firstSuggestion) {
+          const brawlerName = firstSuggestion.textContent.trim();
+          document.getElementById("brawler-input").value = brawlerName;
+          submitGuess();
+        }
+      }
+    }
+
+    function showSuggestions() {
+      const input = document.getElementById("brawler-input").value.trim().toLowerCase();
+      const suggestionsDiv = document.getElementById("suggestions");
+      suggestionsDiv.innerHTML = "";
+
+      if (input === "") {
+        suggestionsDiv.style.display = "none";
+        return;
+      }
+
+      const matchingBrawlers = Object.keys(brawlersData).filter(
+        brawler => brawler.toLowerCase().startsWith(input) && !alreadyGuessed.has(brawler)
+      );
+
+      if (matchingBrawlers.length > 0) {
+        suggestionsDiv.style.display = "block";
+        matchingBrawlers.forEach(brawler => {
+          const suggestion = document.createElement("div");
+          const img = document.createElement("img");
+          img.src = brawlersData[brawler].image;
+          suggestion.appendChild(img);
+          suggestion.appendChild(document.createTextNode(brawler));
+          suggestion.onclick = () => {
+            document.getElementById("brawler-input").value = brawler;
+            suggestionsDiv.style.display = "none";
+            submitGuess();
+          };
+          suggestionsDiv.appendChild(suggestion);
+        });
+      } else {
+        suggestionsDiv.style.display = "none";
+      }
+    }
+
+    function showVictoryScreen() {
+      const victoryContainer = document.createElement("div");
+      victoryContainer.className = "victory-container show";
+      victoryContainer.innerHTML = `
+        <h1>Félicitations ! 🎉</h1>
+        <p>Vous avez trouvé le bon Brawler : ${personnageMystere} !</p>
+        <button onclick="location.reload()">Rejouer</button>
+      `;
+      document.body.appendChild(victoryContainer);
+      createConfetti();
+    }
+
+    function createConfetti() {
+      const confettiContainer = document.createElement("div");
+      confettiContainer.className = "confetti";
+      document.body.appendChild(confettiContainer);
+    
+      for (let i = 0; i < 100; i++) {
+        const confettiPiece = document.createElement("div");
+        confettiPiece.className = "confetti-piece";
+        confettiPiece.style.left = Math.random() * 100 + "vw";
+        confettiPiece.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confettiPiece.style.animationDuration = Math.random() * 2 + 3 + "s";
+        confettiPiece.style.animationDelay = Math.random() * 2 + "s";
+        confettiContainer.appendChild(confettiPiece);
+      }
+    }
+  </script>
+</body>
+</html>
